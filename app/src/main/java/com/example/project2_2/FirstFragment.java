@@ -27,13 +27,17 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class FirstFragment extends Fragment {
 
     private FragmentFirstBinding binding;
     private FirebaseFirestore mFirestore;
+    private MyViewModel myViewModel;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Workout workout = new Workout();
+    String stringdate;
+    Date dateset;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -45,11 +49,13 @@ public class FirstFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        MyViewModel myViewModel = new ViewModelProvider(requireActivity()).get(MyViewModel.class);
+        myViewModel = new ViewModelProvider(requireActivity()).get(MyViewModel.class);
 
         SharedPreferences pref = this.getActivity().getSharedPreferences("Index", Context.MODE_PRIVATE);
-        myViewModel.IndexCurr = 0;
-        //myViewModel.IndexCurr = pref.getInt("Index", 1000);
+        myViewModel.IndexCurr = pref.getInt("Index", 1000) - 1;
+
+        myViewModel.getElapsedTime().setValue(0L);
+        myViewModel.nextTime = 0;
 
         CollectionReference ref = db.collection("workouts");
         ref.whereEqualTo("index", myViewModel.IndexCurr).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -64,30 +70,34 @@ public class FirstFragment extends Fragment {
         binding.buttonPrevious.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                myViewModel.IndexCurr = myViewModel.IndexCurr - 1;
-                CollectionReference ref = db.collection("workouts");
-                ref.whereEqualTo("index", myViewModel.IndexCurr).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        workout = queryDocumentSnapshots.getDocuments().get(0).toObject(Workout.class);
-                        setViews();
-                    }
-                });
+                if (myViewModel.IndexCurr > 0) {
+                    myViewModel.IndexCurr = myViewModel.IndexCurr - 1;
+                    CollectionReference ref = db.collection("workouts");
+                    ref.whereEqualTo("index", myViewModel.IndexCurr).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            workout = queryDocumentSnapshots.getDocuments().get(0).toObject(Workout.class);
+                            setViews();
+                        }
+                    });
+                }
             }
         });
 
         binding.buttonNext.setOnClickListener(new View.OnClickListener() {
               @Override
               public void onClick(View view) {
-                  myViewModel.IndexCurr = myViewModel.IndexCurr + 1;
-                  CollectionReference ref = db.collection("workouts");
-                  ref.whereEqualTo("index", myViewModel.IndexCurr).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                      @Override
-                      public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                          workout = queryDocumentSnapshots.getDocuments().get(0).toObject(Workout.class);
-                          setViews();
-                      }
-                  });
+                  if (myViewModel.IndexCurr < pref.getInt("Index", 1000) - 1) {
+                      myViewModel.IndexCurr = myViewModel.IndexCurr + 1;
+                      CollectionReference ref = db.collection("workouts");
+                      ref.whereEqualTo("index", myViewModel.IndexCurr).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                          @Override
+                          public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                              workout = queryDocumentSnapshots.getDocuments().get(0).toObject(Workout.class);
+                              setViews();
+                          }
+                      });
+                  }
               }
           });
 
@@ -99,8 +109,23 @@ public class FirstFragment extends Fragment {
         });
     }
 
+    /**
+     * This is used to set the views on the first screen that read workout stats
+     */
     public void setViews() {
-        String date = getString(R.string.textView_date, workout.getDate());
+
+
+        long longdate = (long) workout.getDate();
+        longdate = longdate * 400000;
+        dateset = new Date(longdate);
+        stringdate = dateset.toString();
+
+        long hour = workout.getTime() / 36000;
+        long minute = (workout.getTime() / 600) - (hour * 60);
+        long second = (workout.getTime() / 10) - (minute * 60);
+
+
+        String date = getString(R.string.textView_date, stringdate);
         binding.textViewDate.setText(date);
 
         String distance = getString(R.string.textView_distance, workout.getDistance());
@@ -109,8 +134,8 @@ public class FirstFragment extends Fragment {
         String rating = getString(R.string.textView_rating, workout.getRating());
         binding.textViewRating.setText(rating);
 
-        String time = getString(R.string.textView_time, workout.getTime());
-        binding.textViewTime.setText(time);
+        String text = getString(R.string.textview_timer, hour, minute, second, workout.getTime() % 10);
+        binding.textViewTime.setText(text);
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.example.project2_2.model;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
+import java.util.Date;
+
 /**
  * Restaurant POJO.
  */
@@ -14,7 +16,7 @@ public class Workout {
     public static final String FIELD_RATING = "rating";
     public static final String FIELD_INDEX = "index";
 
-    private String date;
+    private int date;
     private int time;
     private int distance;
     private int rating;
@@ -22,7 +24,7 @@ public class Workout {
 
     public Workout() {}
 
-    public Workout(String date, int time, int distance, int rating, int index) {
+    public Workout(int date, int time, int distance, int rating, int index) {
         this.date = date;
         this.time = time;
         this.distance = distance;
@@ -30,11 +32,11 @@ public class Workout {
         this.index = index;
     }
 
-    public String getDate() {
+    public int getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(int date) {
         this.date = date;
     }
 

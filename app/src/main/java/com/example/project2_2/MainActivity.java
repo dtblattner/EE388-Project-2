@@ -2,7 +2,9 @@ package com.example.project2_2;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.project2_2.model.Workout;
@@ -52,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SharedPreferences pref = this.getSharedPreferences("Index", Context.MODE_PRIVATE);
+
+
         // View model
         viewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
@@ -83,10 +88,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Decide if should sign in
+     * @return yes or no
+     */
     private boolean shouldStartSignIn() {
         return (!MyViewModel.getIsSigningIn() && FirebaseUtil.getAuth().getCurrentUser() == null);
     }
 
+    /**
+     * Sign in
+     */
     private void startSignIn() {
         // Sign in with FirebaseUI
         Intent intent = FirebaseUtil.getAuthUI()

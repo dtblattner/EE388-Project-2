@@ -14,9 +14,11 @@
     <string name="button_Next">Next Workout</string>
     <string name="button_Workout">Start Workout</string>
 
-    <string name="textView_distance">Distance: %1$d</string>
+    <string name="textView_distance">Distance: %1$d miles</string>
     <string name="textView_date">Date: %1$s</string>
     <string name="textView_rating">Rating: %1$d</string>
     <string name="textView_time">Time: %1$d</string>
+    <string name="textview_timer">Time: %1$02d:%2$02d:%3$02d:%4$d</string>
+    <string name="textView_Start">Start</string>
 
 </resources>
